@@ -3,3 +3,5 @@ firebase-admin
 llama-index
 streamlit
 pyrebase
+pycrypt
+rsa
