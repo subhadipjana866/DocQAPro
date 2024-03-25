@@ -2,4 +2,4 @@ pyrebase4
 firebase
 streamlit
 requests
-llama-index
+llama-index==0.10.15
