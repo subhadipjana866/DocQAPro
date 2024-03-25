@@ -12,14 +12,14 @@ menu()
 
 
 firebaseConfig = {
-  'apiKey': "AIzaSyB1bstaExh83Azyr190rdC00M-RZGCEvgk",
-  'authDomain': "testproject-cb717.firebaseapp.com",
-  'projectId': "testproject-cb717",
-  'storageBucket': "testproject-cb717.appspot.com",
-  'messagingSenderId': "513075433545",
-  'appId': "1:513075433545:web:eee7fd4eb6c708ef93ef98",
-  'measurementId': "G-G68Z9SSZ4T",
-  'databaseURL': ''
+  'apiKey': st.secrets["apiKey"],
+  'authDomain': st.secrets["authDomain"],
+  'projectId': st.secrets["projectId"],
+  'storageBucket': st.secrets["storageBucket"],
+  'messagingSenderId': st.secrets["messagingSenderId"],
+  'appId': st.secrets["appId"],
+  'measurementId': st.secrets["measurementId"],
+  'databaseURL': st.secrets["databaseURL"]
   }
 
 firebase = pyrebase.initialize_app(firebaseConfig)
