@@ -2,4 +2,5 @@ pyrebase4
 firebase
 streamlit
 requests
+urllib3
 llama-index==0.10.15
