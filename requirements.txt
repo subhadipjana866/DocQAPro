@@ -1,5 +1,7 @@
 pyrebase4
 firebase
 requests
+lxml
+cssselect
 urllib3
 llama-index==0.10.15
