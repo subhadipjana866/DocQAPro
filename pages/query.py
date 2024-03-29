@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from menu import menu
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, load_index_from_storage
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex,SummaryIndex, StorageContext, load_index_from_storage
 from llama_index.core.memory import ChatMemoryBuffer
 
 st.set_page_config(page_title="Query", page_icon="🦙")
@@ -30,7 +30,9 @@ if os.path.exists(f'index/{project_name}'):
 else:
     docs = SimpleDirectoryReader(f"{st.session_state.role}/{project_name}").load_data()
     index = VectorStoreIndex.from_documents(docs)
+    summary = SummaryIndex.from_documents(docs)
     index.storage_context.persist(f'index/{project_name}')
+    summary.storage_context.persist(f'summary/{project_name}')
 
 
 
@@ -40,8 +42,12 @@ def query():
         st.session_state.messages.append({"role": "user", "content": query})
         with st.chat_message(f"{st.session_state.role}"):
                 st.markdown(query)
-        storage_context = StorageContext.from_defaults(persist_dir=f'index/{project_name}')
-        index = load_index_from_storage(storage_context)
+        if "summary" or "short note" or "TLDR" or "tl;dr" in query:
+            storage_context = StorageContext.from_defaults(persist_dir=f'summary/{project_name}')
+            index = load_index_from_storage(storage_context)
+        else:
+            storage_context = StorageContext.from_defaults(persist_dir=f'index/{project_name}')
+            index = load_index_from_storage(storage_context)
         chat_engine = index.as_chat_engine(
             chat_mode="context",
             memory=ChatMemoryBuffer.from_defaults(token_limit=16000),

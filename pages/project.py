@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import pyrebase
 from menu import menu
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, SummaryIndex
 # from llama_index.core import StorageContext
 
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]
@@ -65,7 +65,9 @@ def show_files(project_name):
 def create_index(project_name):
     docs = SimpleDirectoryReader(f"{st.session_state.role}/{project_name}").load_data()
     index = VectorStoreIndex.from_documents(docs)
+    summary = SummaryIndex.from_documents(docs)
     index.storage_context.persist(f'index/{project_name}')
+    summary.storage_context.persist(f'summary/{project_name}')
 
 
 st.header("Select or Create Project")
