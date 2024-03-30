@@ -7,7 +7,7 @@ from menu import menu
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Llama Index", page_icon="🦙")
+    st.set_page_config(page_title="DocQA Pro", page_icon="🦙")
 
 
     # Page Title and Description

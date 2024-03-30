@@ -10,6 +10,8 @@ if "role" not in st.session_state:
 st.set_page_config(page_title="Login/Signup", page_icon="🦙")
 menu()
 
+if "projects" not in st.session_state:
+        st.session_state.projects = []
 
 firebaseConfig = {
   'apiKey': st.secrets["apiKey"],
@@ -26,11 +28,8 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
 def signup(email,password):
-    if auth.get_account_info(email):
-        return "User already exists"
-    else:
-        user = auth.create_user_with_email_and_password(email, password)
-        return user
+    user = auth.create_user_with_email_and_password(email, password)
+    return user
 
 def login(email,password):
     try:
@@ -53,6 +52,10 @@ if type == "Log In":
         else:
             st.success("Successfully Logged In")
             st.session_state.role = user['email']
+            if os.path.exists(f"{st.session_state.role}"):
+                projects = os.listdir(f"{st.session_state.role}")
+                for project in projects:
+                    st.session_state.projects.append(project)
             st.switch_page("./pages/project.py")
 if type == "Sign Up":
     st.header("Sign Up")

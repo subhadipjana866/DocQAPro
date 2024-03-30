@@ -16,25 +16,27 @@ for message in st.session_state.messages:
 
 gen_prompt = "Leverage your chatbot abilities to answer some given questions on a specific topic by only using the context provided, not using any prior knowledge, making sure to avoid repetitions in the informations and write the answers in such a way that all the answers must follow the flow and together can be used to form a report."
 
+try: 
+    project_name = st.sidebar.selectbox("Select Project:", options=st.session_state.projects)
+    st.sidebar.write(f"Selected Project: {project_name}")
+    if os.path.exists(f'{st.session_state.role}/index/{project_name}'):
+        if os.path.exists(f"{st.session_state.role}/{project_name}"):
+            files = os.listdir(f"{st.session_state.role}/{project_name}")
+            if files:
+                for file in files:
+                    st.sidebar.write(file)
+            else:
+                st.sidebar.write("The project is empty.")
+    else:
+        docs = SimpleDirectoryReader(f"{st.session_state.role}/{project_name}").load_data()
+        index = VectorStoreIndex.from_documents(docs)
+        summary = SummaryIndex.from_documents(docs)
+        index.storage_context.persist(f'{st.session_state.role}/index/{project_name}')
+        summary.storage_context.persist(f'{st.session_state.role}/summary/{project_name}')
 
-project_name = st.sidebar.selectbox("Select Project:", options=st.session_state.projects)
-st.sidebar.write(f"Selected Project: {project_name}")
-if os.path.exists(f'index/{project_name}'):
-    if os.path.exists(f"{st.session_state.role}/{project_name}"):
-        files = os.listdir(f"{st.session_state.role}/{project_name}")
-        if files:
-            for file in files:
-                st.sidebar.write(file)
-        else:
-            st.sidebar.write("The project is empty.")
-else:
-    docs = SimpleDirectoryReader(f"{st.session_state.role}/{project_name}").load_data()
-    index = VectorStoreIndex.from_documents(docs)
-    summary = SummaryIndex.from_documents(docs)
-    index.storage_context.persist(f'index/{project_name}')
-    summary.storage_context.persist(f'summary/{project_name}')
-
-
+except Exception as e:
+    st.write("No Index Found.")
+    st.stop()
 
 def query():
     query = st.chat_input(f"Enter Query:")
@@ -43,14 +45,14 @@ def query():
         with st.chat_message(f"{st.session_state.role}"):
                 st.markdown(query)
         if "summary" or "short note" or "TLDR" or "tl;dr" in query:
-            storage_context = StorageContext.from_defaults(persist_dir=f'summary/{project_name}')
+            storage_context = StorageContext.from_defaults(persist_dir=f'{st.session_state.role}/summary/{project_name}')
             index = load_index_from_storage(storage_context)
         else:
-            storage_context = StorageContext.from_defaults(persist_dir=f'index/{project_name}')
+            storage_context = StorageContext.from_defaults(persist_dir=f'{st.session_state.role}/index/{project_name}')
             index = load_index_from_storage(storage_context)
         chat_engine = index.as_chat_engine(
             chat_mode="context",
-            memory=ChatMemoryBuffer.from_defaults(token_limit=16000),
+            memory=ChatMemoryBuffer.from_defaults(token_limit=500000),
             system_prompt=(
                 f"{gen_prompt}\n"
                 "Only use the given context, do not add any prior knowledge."
@@ -59,8 +61,9 @@ def query():
             )
         # response = chat_engine.chat(query)
         with st.chat_message("assistant"):
-            response = chat_engine.chat(query)
-            st.markdown(response)
+            with st.spinner("Grabbing the answers..."):
+                response = chat_engine.chat(query)
+                st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
 
 

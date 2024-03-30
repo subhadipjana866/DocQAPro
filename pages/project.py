@@ -1,9 +1,10 @@
 import streamlit as st
 import os
+import pptx
 import pyrebase
+import time
 from menu import menu
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, SummaryIndex
-# from llama_index.core import StorageContext
 
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]
 import pyrebase
@@ -32,24 +33,34 @@ if "projects" not in st.session_state:
 
 if "curr" not in st.session_state:
     st.session_state.curr = None
-# create project
+
+
 def create_project(project_name):
     st.session_state.projects.append(project_name)
     st.success(f"Project '{project_name}' created successfully.")
     st.rerun()
     
 
-# Function to handle file upload and storage
 def upload_and_store_files(file_uploads, target_folder):
     file_paths = []
     for file_upload in file_uploads:
         if file_upload is not None:
             file_path = os.path.join(target_folder, file_upload.name)
-            # storage.child(file_path).put(file_upload)
             if not os.path.exists(target_folder):
                 os.makedirs(target_folder)
-            with open(file_path, "wb") as f:
-                f.write(file_upload.getbuffer())
+            
+            if file_path.endswith(".pptx"):
+                ppt = pptx.Presentation(file_upload)
+                text = []
+                for slide in ppt.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            text.append(shape.text)
+                with open(f'{st.session_state.role}/{project_name}/{str(file_upload.name).split(".")[0]}.txt', "w") as f:
+                    f.write("\n".join(text))
+            else:
+                with open(file_path, "wb") as f:
+                    f.write(file_upload.getbuffer())
             file_paths.append(file_path)
     return file_paths
 
@@ -66,8 +77,8 @@ def create_index(project_name):
     docs = SimpleDirectoryReader(f"{st.session_state.role}/{project_name}").load_data()
     index = VectorStoreIndex.from_documents(docs)
     summary = SummaryIndex.from_documents(docs)
-    index.storage_context.persist(f'index/{project_name}')
-    summary.storage_context.persist(f'summary/{project_name}')
+    index.storage_context.persist(f'{st.session_state.role}/index/{project_name}')
+    summary.storage_context.persist(f'{st.session_state.role}/summary/{project_name}')
 
 
 st.header("Select or Create Project")
@@ -96,8 +107,6 @@ with st.form(key='document_upload_form'):
     if submit_upload:
         if uploaded_files and project_name:
             target_folder = f"{st.session_state.role}/{project_name}/"
-            # if not os.path.exists(target_folder):
-            #     os.makedirs(target_folder)
             file_paths = upload_and_store_files(uploaded_files, target_folder)
             if file_paths:
                 st.success("Files uploaded and stored successfully:")
@@ -105,12 +114,15 @@ with st.form(key='document_upload_form'):
                     st.write(file_path)
             else:
                 st.error("Failed to upload files.")
+st.write("Once you have uploaded the files, click on 'Create Index' to create an index for the project.")
 with st.form(key='index_form'):
     submit_index = st.form_submit_button('Create Index')
     if submit_index:
         if project_name:
-            create_index(project_name)
-            st.success("Index created successfully.")
+            with st.spinner('Cooking up some index... Wait for it... 🍳'):
+                create_index(project_name)
+            st.success("Navigate to the Query page to start querying.")
+            st.toast('Index Creation Successful!', icon='🎉')
         else:
             st.error("Please select a project to create index.")
 
