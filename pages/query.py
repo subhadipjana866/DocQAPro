@@ -4,7 +4,7 @@ from menu import menu
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex,SummaryIndex, StorageContext, load_index_from_storage
 from llama_index.core.memory import ChatMemoryBuffer
 
-st.set_page_config(page_title="Query", page_icon="🦙")
+st.set_page_config(page_title="DORA", page_icon="🦙")
 menu()
 
 if "messages" not in st.session_state:

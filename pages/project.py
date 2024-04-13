@@ -22,7 +22,7 @@ firebaseConfig = {
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 
-st.set_page_config(page_title="Projects", page_icon="🦙")
+st.set_page_config(page_title="DORA", page_icon="🦙")
 menu()
 
 if "role" not in st.session_state or st.session_state.role is None:

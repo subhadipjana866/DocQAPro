@@ -7,7 +7,7 @@ if "role" not in st.session_state:
     st.session_state.role = None
 
 
-st.set_page_config(page_title="Login/Signup", page_icon="🦙")
+st.set_page_config(page_title="DORA", page_icon="🦙")
 menu()
 
 if "projects" not in st.session_state:
@@ -46,7 +46,8 @@ if type == "Log In":
     password = st.text_input("Password", type='password')
     login_button = st.button("Login")
     if login_button:
-        user = login(email,password)
+        with st.spinner("Taking you to the Dashboard..."):
+            user = login(email,password)
         if user == "Invalid Credentials":
             st.error("Invalid Credentials")
         else:
@@ -63,7 +64,8 @@ if type == "Sign Up":
     password = st.text_input("Password", type='password')
     signup_button = st.button("Sign Up")
     if signup_button:
-        user = signup(email,password)
+        with st.spinner("Onboarding you..."):
+            user = signup(email,password)
         if user == "User already exists":
             st.error("User already exists")
         else:
