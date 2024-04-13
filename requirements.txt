@@ -3,3 +3,4 @@ firebase
 pyrebase4
 streamlit
 requests
+urllib3
