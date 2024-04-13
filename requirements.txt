@@ -4,3 +4,4 @@ pyrebase4
 streamlit
 requests
 urllib3
+requests-toolbelt
